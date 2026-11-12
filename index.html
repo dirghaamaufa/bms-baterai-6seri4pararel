@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pengukur Kapasitas Baterai 6S4P</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#eef3f9;--grid:#d3dded;--grid2:#bccbe3;--ink:#0f2747;--mut:#4a6086;--line:#0f2747;--fill:#1d5fd6;--weak:#e08a00;--trk:#dfe8f5;
+--btn:#0f2747;--btnx:#eef3f9;--ok:#0f7a4a;--wn:#a86200;--bad:#b82a2a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b2447;--grid:#12376a;--grid2:#1a4a86;--ink:#e8f0ff;--mut:#9db8e6;--line:#8fb1ee;--fill:#5ec8ff;--weak:#ffc24a;--trk:#0f3160;--btn:#ffc24a;--btnx:#0b2447;--ok:#78e3ae;--wn:#ffc24a;--bad:#ff8c8c}}
+:root[data-theme="dark"]{--bg:#0b2447;--grid:#12376a;--grid2:#1a4a86;--ink:#e8f0ff;--mut:#9db8e6;--line:#8fb1ee;--fill:#5ec8ff;--weak:#ffc24a;--trk:#0f3160;--btn:#ffc24a;--btnx:#0b2447;--ok:#78e3ae;--wn:#ffc24a;--bad:#ff8c8c}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font:400 16px/1.55 Barlow,"Segoe UI",system-ui,sans-serif;background-color:var(--bg);
+background-image:linear-gradient(var(--grid2) 1px,transparent 1px),linear-gradient(90deg,var(--grid2) 1px,transparent 1px),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+background-size:120px 120px,120px 120px,24px 24px,24px 24px}
+main{max-width:720px;margin:0 auto;padding:26px 18px 40px}
+h1,h2,.big{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;margin:0}
+h1{font-size:clamp(42px,10vw,64px);line-height:1;letter-spacing:-.01em;max-width:11em}
+h2{font-size:30px;line-height:1.1}
+p{margin:12px 0;color:var(--mut);max-width:60ch}
+svg{display:block;width:100%;height:auto;margin:18px 0 6px}
+.trk{fill:var(--trk);stroke:var(--line);stroke-width:1}
+.fl{fill:var(--fill);transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(var(--s,0))}
+.fl.weak{fill:var(--weak)}
+.strip{stroke:var(--line);stroke-width:2}
+.tv{fill:var(--ink);font:600 14px "Barlow Condensed",sans-serif}
+.tl{fill:var(--mut);font:500 12px Barlow,sans-serif}
+.anim .fl{transition:transform 1.1s cubic-bezier(.2,.8,.2,1)}
+.live .fl{transition:transform .25s ease-out}
+@media (prefers-reduced-motion:reduce){.fl{transition:none!important}}
+dl{margin:20px 0 0;border-top:1.5px solid var(--line)}
+dl div{display:grid;grid-template-columns:7.5em 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--grid2)}
+dt{font-weight:600}dd{margin:0;color:var(--mut)}
+button{font:600 17px Barlow,system-ui,sans-serif;background:var(--btn);color:var(--btnx);border:0;border-radius:2px;padding:13px 26px;cursor:pointer;box-shadow:3px 3px 0 var(--line)}
+button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--line)}
+button.sec{background:transparent;color:var(--ink);border:1.5px solid var(--line);box-shadow:none}
+button:focus-visible,input:focus-visible{outline:3px solid var(--weak);outline-offset:2px}
+.row{display:flex;gap:14px;flex-wrap:wrap;margin-top:26px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 16px;margin-top:10px}
+label{display:block;font-weight:600;font-size:15px}
+input{width:100%;font:600 22px "Barlow Condensed",sans-serif;padding:8px 10px;border:1.5px solid var(--line);border-radius:2px;background:var(--bg);color:var(--ink)}
+input.err{border-color:var(--bad);border-width:2.5px}
+.msg{color:var(--bad);font-size:13px;min-height:19px}
+.big{font-size:clamp(76px,22vw,130px);line-height:.95;margin-top:14px}
+.big small{font-size:.38em;margin-left:.15em;color:var(--mut)}
+.st{font-size:19px;font-weight:600;margin:6px 0 0}.ok{color:var(--ok)}.wn{color:var(--wn)}.bad{color:var(--bad)}
+.note{font-size:14px;color:var(--mut)}
+ol{margin:12px 0 0;padding-left:1.3em}
+li{margin-bottom:14px;padding-left:4px;font-weight:600}
+li::marker{font-family:"Barlow Condensed",sans-serif;font-size:1.2em}
+code{display:block;margin-top:4px;font:400 14px/1.6 ui-monospace,Consolas,monospace;color:var(--mut);overflow-x:auto;white-space:pre}
+.tb{display:grid;grid-template-columns:2fr 1.2fr 1fr;border:1.5px solid var(--line);margin-top:38px;font-size:14px;background:var(--bg)}
+.tb div{padding:8px 12px;border-left:1.5px solid var(--line)}.tb div:first-child{border-left:0}
+.tb b{display:block;font-size:12px;font-weight:500;color:var(--mut)}
+@media(max-width:480px){.grid{grid-template-columns:repeat(2,1fr)}.tb{grid-template-columns:1fr 1fr}.tb div:first-child{grid-column:1/3;border-bottom:1.5px solid var(--line)}.tb div:nth-child(2){border-left:0}}
+</style>
+</head>
+<body>
+<main>
+<div id="app"></div>
+<div class="tb"><div><b>Judul gambar</b>Pengukur kapasitas baterai</div><div><b>Baterai</b>Li-ion 6S4P</div><div><b>Halaman</b><span id="hal"></span></div></div>
+</main>
+<script>
+const N=6,P=4,KS=2.5,KP=P*KS,VF=4.2,VE=3.0,MAX=5;
+let page=1,vals=Array(N).fill("");
+const $=id=>document.getElementById(id);
+const f=(x,d=2)=>x.toFixed(d).replace(".",",");
+const soc=v=>Math.min(100,Math.max(0,(v-VE)/(VF-VE)*100));
+const stat=s=>s>=95?["Penuh","ok"]:s>=50?["Baik","ok"]:s>=20?["Sedang, segera isi ulang","wn"]:s>0?["Rendah, isi ulang sekarang","bad"]:["Habis, hentikan pemakaian","bad"];
+const parse=t=>{t=String(t).trim().replace(",",".");return /^(\d+\.?\d*|\.\d+)$/.test(t)?parseFloat(t):NaN};
+const okv=x=>!isNaN(x)&&x>=0&&x<=MAX;
+
+function pack(cls){
+  let s=`<svg class="${cls}" viewBox="0 0 360 138" role="img" aria-label="Susunan baterai: 6 grup seri, tiap grup 4 sel paralel">`;
+  for(let i=0;i<N;i++){
+    s+=`<g transform="translate(${i*62},0)"><text class="tv" id="t${i}" x="25" y="13" text-anchor="middle">–</text>`;
+    for(let k=0;k<P;k++){const x=k*13;
+      s+=`<rect class="trk" x="${x}" y="24" width="11" height="84" rx="2"/><rect class="fl g${i}" x="${x}" y="24" width="11" height="84" rx="2"/>`}
+    s+=`<line class="strip" x1="0" y1="19" x2="${i<N-1?62:50}" y2="19"/><text class="tl" x="25" y="128" text-anchor="middle">S${i+1}</text></g>`}
+  return s+`</svg>`}
+
+function setPack(a,w){
+  a.forEach((x,i)=>{
+    document.querySelectorAll(".g"+i).forEach(e=>{e.style.setProperty("--s",okv(x)?soc(x)/100:0);e.classList.toggle("weak",i===w)});
+    $("t"+i).textContent=okv(x)?f(x):"–"})}
+
+function go(p){page=p;render();window.scrollTo(0,0)}
+
+function p1(){return `
+<h1>Berapa sisa isi baterai kamu?</h1>
+<p>Masukkan tegangan 6 grup sel, lalu lihat sisa kapasitasnya dalam Ah.</p>
+${pack("")}
+<p class="note">Contoh pembacaan. Setiap grup berisi 4 sel yang tegangannya sama.</p>
+<dl>
+<div><dt>Seri</dt><dd>6 grup × 3,7 V = 22,2 V. Tegangan dijumlahkan.</dd></div>
+<div><dt>Paralel</dt><dd>4 sel × 2.500 mAh = 10.000 mAh. Kapasitas dijumlahkan.</dd></div></dl>
+<div class="row"><button onclick="go(2)">Start</button></div>`}
+
+function p2(){return `
+<h2>Tegangan tiap grup</h2>
+<p>Ukur dengan voltmeter, lalu isi nilainya (0–${MAX} V). Koma atau titik sama-sama boleh. Gambar di bawah ikut terisi.</p>
+${pack("live")}
+<div class="grid">${vals.map((v,i)=>`<div><label for="v${i}">Grup S${i+1}</label>
+<input id="v${i}" inputmode="decimal" autocomplete="off" placeholder="3,85" value="${v}" oninput="live()"><div class="msg" id="m${i}"></div></div>`).join("")}</div>
+<div class="row"><button onclick="hitung()">Hitung</button><button class="sec" onclick="go(1)">Kembali</button></div>`}
+
+function live(){
+  const a=vals.map((_,i)=>parse($("v"+i).value));
+  setPack(a,a.every(okv)?a.indexOf(Math.min(...a)):-1)}
+
+function hitung(){
+  let ok=true;const nv=[];
+  for(let i=0;i<N;i++){
+    const t=$("v"+i).value;vals[i]=t;const x=parse(t),bad=!okv(x);
+    $("v"+i).classList.toggle("err",bad);
+    $("m"+i).textContent=bad?`Isi angka 0–${MAX}, contoh 3,85`:"";
+    if(bad)ok=false;else nv.push(x)}
+  if(ok){vals=nv;go(3)}}
+
+function p3(){
+  const v=vals,tot=v.reduce((a,b)=>a+b,0),w=v.indexOf(Math.min(...v)),vw=v[w];
+  const raw=(vw-VE)/(VF-VE)*100,s=soc(vw),sisa=s/100*KP,pakai=KP-sisa,[st,cl]=stat(s);
+  return `
+<h2>Sisa kapasitas</h2>
+<div class="big">${f(sisa)}<small>Ah</small></div>
+<p class="st ${cl}">${st}</p>
+<p class="note" style="margin-top:2px">dari kapasitas pack ${f(KP)} Ah, terisi ${f(s,0)} %</p>
+${pack("anim")}
+<p class="note">Grup berwarna kuning adalah yang terlemah. Kapasitas pack mengikuti grup ini, seperti rantai yang kekuatannya ditentukan mata rantai terlemah.</p>
+<h2 style="margin-top:34px">Cara menghitungnya</h2>
+<ol>
+<li>Jumlahkan tegangan semua grup (seri)<code>${v.map(x=>f(x)).join(" + ")} = ${f(tot)} V</code></li>
+<li>Cari grup dengan tegangan terendah<code>S${w+1} = ${f(vw)} V</code></li>
+<li>Hitung persen isi (SOC) grup itu<code>(${f(vw)} − ${f(VE)}) / (${f(VF)} − ${f(VE)}) × 100 = ${f(raw)} %${raw!==s?`\ndibatasi 0–100 %, menjadi ${f(s)} %`:""}</code></li>
+<li>Kalikan dengan kapasitas pack<code>${P} × ${f(KS)} Ah = ${f(KP)} Ah\n${f(s)} % × ${f(KP)} Ah = ${f(sisa)} Ah</code></li>
+<li>Kurangkan untuk kapasitas terpakai<code>${f(KP)} − ${f(sisa)} = ${f(pakai)} Ah</code></li>
+<li>Tentukan status dari persen isi<code>${f(s,0)} %  →  ${st}</code></li></ol>
+<dl><div><dt>Tegangan total</dt><dd>${f(tot)} V</dd></div>
+<div><dt>Terpakai</dt><dd>${f(pakai)} Ah</dd></div></dl>
+<div class="row"><button onclick="reset()">Reset</button></div>`}
+
+function reset(){vals=Array(N).fill("");go(1)}
+
+function render(){
+  $("app").innerHTML=[p1,p2,p3][page-1]();
+  $("hal").textContent=page+" dari 3";
+  if(page===1)setPack([3.85,3.87,3.86,3.84,3.85,3.88],-1);
+  if(page===2){live();$("v0").focus()}
+  if(page===3){const w=vals.indexOf(Math.min(...vals));setTimeout(()=>setPack(vals,w),80)}}
+render();
+</script>
+</body>
+</html>
